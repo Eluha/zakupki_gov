@@ -1,8 +1,7 @@
 import config
 import paramiko
-
 import xmlschema
-
+from tqdm import tqdm
 # здесь находятся, написанные функции для 
 from functions_parsing_zakupki import table_filling, take_data_from_test_root, execute_transaction, create_dict_tables_with_columns, create_conn_test_db
 
@@ -32,11 +31,18 @@ if __name__ == "__main__":
         cur = test_root_conn.cursor()
 
         # Получаем полный перечень путей zip [(path,), (path,), (path,)]
+
+
         list_of_path = take_data_from_test_root('''
-                                                SELECT "path_to_zip" FROM "fz_223"."PATHS_TO_ZIP"
+                                                SELECT "path_to_zip" FROM "fz_223"."PATH_TO_ZIP"
                                                 ''', cur)
+
         # Считываем все пути до директорий (так как документов очень много, то было принято решение заполнять данные по убыванию года)
-        for path in list_of_path:
+
+
+
+        for path in tqdm(list_of_path):
+            
 
             try:
                 # Смотрим, есть ли zip уже в нашем списке
@@ -49,7 +55,7 @@ if __name__ == "__main__":
                 if status_zip:
                     # Если zip в моем репозитории и он недопарсился
                     if status_zip[0][0] == 'I':
-
+                            
 
                         ftp, index_error = table_filling('/home/user/ZAKUPKI/fz223free/out/published/' + path[0], path[0], ftp, cur, test_root_conn, xs, dict_tables_with_columns)
                         # Если вышла ошибка, то записываем 'I', иначе перезаписываем 'I' на 'F'
